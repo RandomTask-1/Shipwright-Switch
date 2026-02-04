@@ -26,24 +26,28 @@ Go through the initial setup to create a username and password then run the belo
 Update apt and install packages:
 ```
 sudo apt update
-sudo apt install gcc g++ git cmake ninja-build lsb-release libsdl2-dev libpng-dev libsdl2-net-dev libzip-dev zipcmp zipmerge ziptool nlohmann-json3-dev libtinyxml2-dev libspdlog-dev libopengl-dev wget libvorbis-dev libopusfile-dev locate ccache libbz2-dev
+sudo apt install gcc g++ git cmake ninja-build lsb-release \
+  libsdl2-dev libpng-dev libsdl2-net-dev libzip-dev zipcmp \
+  zipmerge ziptool nlohmann-json3-dev libtinyxml2-dev libspdlog-dev \
+  libopengl-dev wget libvorbis-dev libopusfile-dev locate ccache libbz2-dev
 ```
 
 Install devkit pro (https://devkitpro.org/wiki/devkitPro_pacman#Debian_and_derivatives):
 ```
-wget -U "dkp-apt" https://apt.devkitpro.org/install-devkitpro-pacman
-chmod +x ./install-devkitpro-pacman
-sudo ./install-devkitpro-pacman
-rm install-devkitpro-pacman
-export DEVKITARM="/opt/devkitpro/devkitARM"
-export DEVKITPPC="/opt/devkitpro/devkitPPC"
-export DEVKITPRO="/opt/devkitpro"
+wget -U "dkp-apt" https://apt.devkitpro.org/install-devkitpro-pacman && \
+  chmod +x ./install-devkitpro-pacman && \
+  sudo ./install-devkitpro-pacman && \
+  rm install-devkitpro-pacman && \
+  export DEVKITARM="/opt/devkitpro/devkitARM" && \
+  export DEVKITPPC="/opt/devkitpro/devkitPPC" && \
+  export DEVKITPRO="/opt/devkitpro" && \
 ```
 
 Install Switch packages for dkp:
 ```
-dkp-pacman -Ssq | grep -E 'switch' | sudo dkp-pacman -S -
-sudo dkp-pacman -Sy catnip deko3d devkit-env devkitA64-gdb devkita64-binutils devkitA64 devkitARM general-tools hactool
+sudo dkp-pacman -Sy catnip deko3d devkit-env devkitA64-gdb && \
+  devkita64-binutils devkitA64 devkitARM general-tools hactool \
+  dkp-pacman -Ssq | grep -E 'switch' | sudo dkp-pacman -S -
 ```
 
 
@@ -58,37 +62,59 @@ Ensure you have the following prerequisites installed:
 
 Build and install libzip & json libraries to devkitPro toolchain
 ```
-wget https://libzip.org/download/libzip-1.10.1.tar.gz
-tar -xzvf libzip-1.10.1.tar.gz && cd libzip-1.10.1
-mkdir build && cd build
-cmake -H.. -B. -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake -DENABLE_ZSTD=OFF
-make
-sudo make install
-cd ../..
-rm -rf libzip-1.10.1
-rm libzip-1.10.1.tar.gz
+wget https://libzip.org/download/libzip-1.10.1.tar.gz && \
+  tar -xzvf libzip-1.10.1.tar.gz && cd libzip-1.10.1 && \
+  mkdir build && cd build && \
+  cmake -H.. \
+    -B. \
+    -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
+    -DENABLE_ZSTD=OFF && \
+  make && \
+  sudo make install && \
+  cd ../.. && \
+  rm -rf libzip-1.10.1 && \
+  rm libzip-1.10.1.tar.gz
 
 
-wget https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.tar.gz
-tar -xzvf v3.11.3.tar.gz && cd json-3.11.3
-mkdir build && cd build
-cmake -H.. -B. -DJSON_BuildTests=OFF -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake
-make
-sudo make install
-cd ../..
-rm -rf json-3.11.3
-rm v3.11.3.tar.gz
+wget https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.tar.gz && \
+  tar -xzvf v3.11.3.tar.gz && cd json-3.11.3 && \
+  mkdir build && cd build && \
+  cmake -H.. \
+    -B. \
+    -DJSON_BuildTests=OFF \
+    -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake && \
+  make && \
+  sudo make install && \
+  cd ../.. && \
+  rm -rf json-3.11.3 && \
+  rm v3.11.3.tar.gz 
 ```
 
-Clone Repository  (Use SSH to avoid permission denied errors on submodules):
+Clone Repository with SSH:
 ```
-git clone --recursive git@github.com:timschneeb/Shipwright-Switch.git
-cd Shipwright-Switch
+git clone --recursive git@github.com:timschneeb/Shipwright-Switch.git && \
+  cd Shipwright-Switch
 ```
+
+Clone Repository with HTTPS:
+```
+git clone https://github.com/timschneeb/Shipwright-Switch.git && \
+  cd Shipwright-Switch && \
+  sed -i 's/git@github.com:/https:\/\/github.com\//g' .gitmodules && \
+  git submodule update --init
+```
+
 
 Configure the project with CMake (run in root of repository):
 ```
-cmake -H. -Bbuild-switch -GNinja -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DBUILD_REMOTE_CONTROL=1
+cmake -H. \
+  -Bbuild-switch \
+  -GNinja \
+  -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
+  -DCMAKE_BUILD_TYPE:STRING=Release \
+  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+  -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+  -DBUILD_REMOTE_CONTROL=1
 ```
 
 Build (Adjust j for the number of cores you wish to use):
