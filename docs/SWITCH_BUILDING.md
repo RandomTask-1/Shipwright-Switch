@@ -24,16 +24,16 @@ Open Ubuntu from the start menu or terminal
 Go through the initial setup to create a username and password then run the below commands
 
 Update apt and install packages:
-```
+```bash
 sudo apt update
 sudo apt install gcc g++ git cmake ninja-build lsb-release \
-  libsdl2-dev libpng-dev libsdl2-net-dev libzip-dev zipcmp \
+  libsdl2-dev libpng-dev libsdl2-net-dev libzip-dev zipcmp pkg-config \
   zipmerge ziptool nlohmann-json3-dev libtinyxml2-dev libspdlog-dev \
   libopengl-dev wget libvorbis-dev libopusfile-dev locate ccache libbz2-dev
 ```
 
 Install devkit pro (https://devkitpro.org/wiki/devkitPro_pacman#Debian_and_derivatives):
-```
+```bash
 wget -U "dkp-apt" https://apt.devkitpro.org/install-devkitpro-pacman && \
   chmod +x ./install-devkitpro-pacman && \
   sudo ./install-devkitpro-pacman && \
@@ -44,7 +44,7 @@ wget -U "dkp-apt" https://apt.devkitpro.org/install-devkitpro-pacman && \
 ```
 
 Install Switch packages for dkp:
-```
+```bash
 sudo dkp-pacman -Sy catnip deko3d devkit-env devkitA64-gdb && \
   devkita64-binutils devkitA64 devkitARM general-tools hactool \
   dkp-pacman -Ssq | grep -E 'switch' | sudo dkp-pacman -S -
@@ -61,7 +61,7 @@ Ensure you have the following prerequisites installed:
 * ccache installed (optional, but recommended for faster builds)
 
 Build and install libzip & json libraries to devkitPro toolchain
-```
+```bash
 wget https://libzip.org/download/libzip-1.10.1.tar.gz && \
   tar -xzvf libzip-1.10.1.tar.gz && cd libzip-1.10.1 && \
   mkdir build && cd build && \
@@ -91,39 +91,49 @@ wget https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.tar.gz && \
 ```
 
 Clone Repository with SSH:
-```
+```bash
 git clone --recursive git@github.com:timschneeb/Shipwright-Switch.git && \
   cd Shipwright-Switch
 ```
 
 Clone Repository with HTTPS:
-```
+```bash
 git clone https://github.com/timschneeb/Shipwright-Switch.git && \
   cd Shipwright-Switch && \
   sed -i 's/git@github.com:/https:\/\/github.com\//g' .gitmodules && \
   git submodule update --init
 ```
 
+ Setup cmake project for your host machine
+```bash
+cmake -H. -Bbuild-cmake -GNinja
+```
+
+ Extract assets & generate OTR (run this anytime you need to regenerate OTR)
+```bash
+cmake --build build-cmake --target ExtractAssets
+```
+
 
 Configure the project with CMake (run in root of repository):
-```
-cmake -H. \
-  -Bbuild-switch \
-  -GNinja \
-  -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
-  -DCMAKE_BUILD_TYPE:STRING=Release \
-  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-  -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+```bash
+cmake -H. \ 
+  -Bbuild-switch \ 
+  -GNinja \ 
+  -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \ 
+  -DCMAKE_BUILD_TYPE:STRING=Release \ 
+  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \ 
+  -DCMAKE_C_COMPILER_LAUNCHER=ccache \ 
   -DBUILD_REMOTE_CONTROL=1
 ```
 
 Build (Adjust j for the number of cores you wish to use):
-```
+```bash
  cmake --build build-switch --target soh_nro -j4 --config Release
 ```
 
 Run on Switch via Sphaira or homebrew launcher with NetLoader enabled:
-```
+```bash
  nxlink -a 192.168.178.177 -s build-switch/soh/soh.nro
 ```
 
